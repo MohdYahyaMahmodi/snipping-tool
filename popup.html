@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Snip In Browser</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="title">
+        <img src="icons/snipper.svg" alt="" />
+        <span>Snip In Browser</span>
+      </div>
+
+      <button id="start">Take Screenshot</button>
+
+      <div class="section">
+        <div class="section-title">Shortcuts</div>
+        <ul class="shortcuts">
+          <li><span class="k" id="sc-global"></span> — Start snipping</li>
+          <li><span class="k" id="sc-copy"></span> — Copy selection</li>
+          <li><span class="k" id="sc-cancel"></span> — Cancel</li>
+          <li>
+            Tip: releasing the mouse after dragging
+            <strong>auto-copies</strong>.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

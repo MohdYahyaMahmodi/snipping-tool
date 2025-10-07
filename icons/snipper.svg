@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" fill="#F3F3F3"/>
+  <!-- Scissors outline -->
+  <circle cx="86" cy="166" r="18" fill="#FFFFFF" stroke="#0078D4" stroke-width="8"/>
+  <circle cx="126" cy="138" r="18" fill="#FFFFFF" stroke="#0078D4" stroke-width="8"/>
+  <path d="M94 158 L200 62" stroke="#1F1F1F" stroke-width="10" stroke-linecap="round"/>
+  <path d="M116 128 L200 194" stroke="#1F1F1F" stroke-width="10" stroke-linecap="round"/>
+  <!-- Snip rectangle -->
+  <rect x="36" y="36" width="140" height="80" fill="none" stroke="#0078D4" stroke-width="8" stroke-dasharray="16 10"/>
+  <!-- Corner handles -->
+  <rect x="28" y="28" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
+  <rect x="172" y="28" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
+  <rect x="28" y="100" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
+  <rect x="172" y="100" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
+</svg>

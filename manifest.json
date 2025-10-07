@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Snip In Browser",
+  "version": "1.1.0",
+  "description": "Windows-style snipping inside Chrome: drag to capture, auto-copy to clipboard.",
+  "action": {
+    "default_title": "Snip In Browser",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/snipper.svg",
+      "24": "icons/snipper.svg",
+      "32": "icons/snipper.svg"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "clipboardWrite",
+    "storage"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "start-snip": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Start snipping overlay"
+    }
+  }
+}
