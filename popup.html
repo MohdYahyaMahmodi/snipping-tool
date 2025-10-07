@@ -12,17 +12,24 @@
         <span>Snip In Browser</span>
       </div>
 
-      <button id="start">Take Screenshot</button>
+      <button id="start">Start Snipping</button>
+
+      <label class="checkbox">
+        <input type="checkbox" id="autoCopy" checked />
+        <span>Auto-copy on mouse release</span>
+      </label>
 
       <div class="section">
         <div class="section-title">Shortcuts</div>
         <ul class="shortcuts">
           <li><span class="k" id="sc-global"></span> — Start snipping</li>
-          <li><span class="k" id="sc-copy"></span> — Copy selection</li>
-          <li><span class="k" id="sc-cancel"></span> — Cancel</li>
           <li>
-            Tip: releasing the mouse after dragging
-            <strong>auto-copies</strong>.
+            <span class="k">Enter</span> or <span class="k">C</span> — Copy
+            selection
+          </li>
+          <li><span class="k">Esc</span> — Cancel</li>
+          <li>
+            Tip: You can move/resize the selection before or after copying.
           </li>
         </ul>
       </div>

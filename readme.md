@@ -23,6 +23,5 @@ A fast, no-frills snipping overlay **inside the browser**, inspired by the Windo
 - 🧭 **Toolbar** anchored to selection’s top-left; **Copy** and **Cancel** buttons
 - 🎯 **Move** and **resize** the selection before copying
 - 🧩 **Manifest V3**: background service worker + content script
-- 🧰 **No gradients**; Win UI colors: `#0078D4` (accent), `#F3F3F3` (panel), `#1F1F1F` (text)
 
 ---

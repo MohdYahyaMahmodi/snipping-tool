@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Snip In Browser",
-  "version": "1.1.0",
-  "description": "Windows-style snipping inside Chrome: drag to capture, auto-copy to clipboard.",
+  "version": "1.2.0",
+  "description": "Windows-style snipping inside Chrome: drag to capture, optional auto-copy on mouseup, and precise selection editing.",
   "action": {
     "default_title": "Snip In Browser",
     "default_popup": "popup.html",

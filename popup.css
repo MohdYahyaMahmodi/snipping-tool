@@ -16,7 +16,7 @@ body {
 }
 
 .wrap {
-  width: 280px;
+  width: 300px;
   padding: 12px;
 }
 
@@ -46,6 +46,20 @@ button#start {
 
 button#start:hover {
   border-color: var(--blue);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--blue);
 }
 
 .section {

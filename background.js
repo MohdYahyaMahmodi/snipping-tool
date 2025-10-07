@@ -12,7 +12,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ ok: true, dataUrl });
       }
     );
-    return true; // async
+    return true; // async response
   }
 
   if (msg?.type === "ENSURE_CONTENT") {
@@ -32,13 +32,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command !== "start-snip") return;
+
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) return;
+
+  // Ensure the content script is injected
   await new Promise((resolve) => {
     chrome.scripting.executeScript(
       { target: { tabId: tab.id }, files: ["content.js"] },
       () => resolve()
     );
   });
-  chrome.tabs.sendMessage(tab.id, { type: "START_SNIP" });
+
+  // Read the user's saved setting for auto-copy and pass it along
+  chrome.storage.sync.get({ autoCopyOnMouseup: true }, (cfg) => {
+    chrome.tabs.sendMessage(tab.id, {
+      type: "START_SNIP",
+      autoCopyOnMouseup: !!cfg.autoCopyOnMouseup,
+    });
+  });
 });

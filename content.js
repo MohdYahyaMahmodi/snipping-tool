@@ -25,9 +25,9 @@
   let activeHandle = null;
   let copiedToastTimeout = null;
   let copyingInProgress = false;
+  let autoCopyOnMouseup = true; // can be overridden by popup/command
 
-  // Behavior flags
-  const AUTO_COPY_ON_DRAG_END = true; // requested: auto-copy after mouseup
+  const MIN_SIZE = 3;
 
   function px(n) {
     return `${n}px`;
@@ -42,6 +42,7 @@
     return d;
   }
 
+  // ----- UI BUILD -----
   function ensureUI() {
     if (overlay) return;
 
@@ -83,13 +84,13 @@
         border: `2px solid ${COLORS.border}`,
         boxSizing: "border-box",
         borderRadius: "2px",
+        cursor: cursorForHandle(pos),
       });
       h.dataset.pos = pos;
-      h.style.cursor = cursorForHandle(pos);
       selection.appendChild(h);
     });
 
-    // Toolbar
+    // Toolbar (top-left of selection)
     toolbar = makeDiv("snip-toolbar", {
       position: "absolute",
       display: "none",
@@ -105,7 +106,7 @@
       alignItems: "center",
     });
 
-    const btn = (id, label, title) => {
+    const button = (id, label, title) => {
       const b = makeDiv(id, {
         border: `1px solid ${COLORS.toolbarBorder}`,
         background: "#FFFFFF",
@@ -117,7 +118,7 @@
       });
       b.textContent = label;
       b.title = title;
-      // prevent toolbar clicks from starting a new drag
+      // prevent starting a new drag when clicking toolbar
       b.addEventListener("mousedown", (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -129,19 +130,17 @@
       return b;
     };
 
-    const copyBtn = btn(
+    const copyBtn = button(
       "snip-btn-copy",
       "Copy",
       "Copy to clipboard (Enter or C)"
     );
-    copyBtn.addEventListener("click", () => confirmSelection());
+    copyBtn.addEventListener("click", () => confirmSelection(false)); // keep overlay after copy
 
-    const cancelBtn = btn("snip-btn-cancel", "Cancel", "Cancel (Esc)");
+    const cancelBtn = button("snip-btn-cancel", "Cancel", "Cancel (Esc)");
     cancelBtn.addEventListener("click", () => removeUI());
 
     toolbar.append(copyBtn, cancelBtn);
-
-    // Ensure toolbar itself doesn't trigger drag
     toolbar.addEventListener("mousedown", (e) => {
       e.stopPropagation();
       e.preventDefault();
@@ -161,6 +160,8 @@
     window.addEventListener("mousemove", onMouseMove, true);
     window.addEventListener("mouseup", onMouseUp, true);
     window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("resize", onResizeOrScroll, true);
+    window.addEventListener("scroll", onResizeOrScroll, true);
   }
 
   function cursorForHandle(pos) {
@@ -195,20 +196,6 @@
       h.style.left = px(x);
       h.style.top = px(y);
     });
-  }
-
-  function onKeyDown(e) {
-    if (!overlay) return;
-    if (e.key === "Escape") {
-      e.stopPropagation();
-      e.preventDefault();
-      removeUI();
-    }
-    if (e.key === "Enter" || e.key.toLowerCase() === "c") {
-      e.stopPropagation();
-      e.preventDefault();
-      confirmSelection();
-    }
   }
 
   function normalizeRect(aX, aY, bX, bY) {
@@ -265,12 +252,23 @@
     toolbar.style.top = px(tTop);
   }
 
+  function getSelectionRect() {
+    return selection.getBoundingClientRect();
+  }
+
+  function onResizeOrScroll() {
+    if (!selection || selection.style.display === "none") return;
+    const r = getSelectionRect();
+    updateMasks(r);
+    placeToolbarTopLeft(r);
+    positionHandles();
+  }
+
+  // ----- INPUT -----
   function onMouseDown(e) {
     if (e.button !== 0) return;
-    // Ignore clicks on toolbar or its children
-    if (e.target.closest(".snip-toolbar")) return;
-
-    // Resize/move if clicking inside selection/handles
+    if (e.target.closest(".snip-toolbar")) return; // ignore toolbar
+    // inside existing selection/handle?
     if (selection.style.display !== "none") {
       if (e.target.classList.contains("snip-handle")) {
         resizing = true;
@@ -279,7 +277,6 @@
         moving = true;
       }
     }
-
     dragging = !moving && !resizing;
     startX = e.clientX;
     startY = e.clientY;
@@ -363,7 +360,6 @@
 
       startX = e.clientX;
       startY = e.clientY;
-
       Object.assign(selection.style, {
         left: px(left),
         top: px(top),
@@ -382,8 +378,12 @@
     if (dragging) {
       dragging = false;
       const r = selection.getBoundingClientRect();
-      if (r.width < 3 || r.height < 3) {
-        removeUI();
+      if (r.width < MIN_SIZE || r.height < MIN_SIZE) {
+        // ignore micro drags; keep overlay alive
+        toolbar.style.display = "none";
+        selection.style.display = "none";
+        overlay.style.cursor = "crosshair";
+        updateMasks({ left: 0, top: 0, width: 0, height: 0 });
         return;
       }
       updateMasks({
@@ -392,13 +392,12 @@
         width: r.width,
         height: r.height,
       });
-      // Toolbar (top-left) in case the user wants control, but we'll auto-copy right away
       placeToolbarTopLeft(r);
       overlay.style.cursor = "default";
 
-      if (AUTO_COPY_ON_DRAG_END) {
-        // tiny delay to avoid racing with mouseup propagation
-        setTimeout(() => confirmSelection(), 30);
+      if (autoCopyOnMouseup) {
+        // slight delay to avoid racing with mouseup events
+        setTimeout(() => confirmSelection(false), 30); // false => keep overlay after copy
       }
     }
 
@@ -410,6 +409,21 @@
     }
   }
 
+  function onKeyDown(e) {
+    if (!overlay) return;
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      e.preventDefault();
+      removeUI();
+    }
+    if (e.key === "Enter" || e.key.toLowerCase() === "c") {
+      e.stopPropagation();
+      e.preventDefault();
+      confirmSelection(false);
+    }
+  }
+
+  // ----- COPY WORKFLOW -----
   function toastCopied(text = "Copied to clipboard") {
     const t = makeDiv("snip-toast", {
       position: "fixed",
@@ -431,10 +445,10 @@
     copiedToastTimeout = setTimeout(() => t.remove(), 1500);
   }
 
-  async function confirmSelection() {
+  async function confirmSelection(removeAfter = false) {
     if (!selection || copyingInProgress) return;
     const r = selection.getBoundingClientRect();
-    if (r.width < 2 || r.height < 2) return;
+    if (r.width < MIN_SIZE || r.height < MIN_SIZE) return;
 
     copyingInProgress = true;
 
@@ -442,11 +456,11 @@
     if (!resp?.ok) {
       alert("Capture failed: " + (resp?.error || "unknown"));
       copyingInProgress = false;
-      removeUI();
+      if (removeAfter) removeUI();
       return;
     }
-    const dataUrl = resp.dataUrl;
 
+    const dataUrl = resp.dataUrl;
     const dpr = window.devicePixelRatio || 1;
     const crop = {
       x: Math.round(r.left * dpr),
@@ -474,7 +488,7 @@
           window.open(url, "_blank");
         } finally {
           copyingInProgress = false;
-          removeUI();
+          if (removeAfter) removeUI(); // normally false; keep selection so user can tweak and re-copy
         }
       }, "image/png");
     };
@@ -495,7 +509,19 @@
     copyingInProgress = false;
   }
 
+  // ----- Messaging -----
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg?.type === "START_SNIP") ensureUI();
+    if (msg?.type === "START_SNIP") {
+      // prefer explicit flag from popup/command; otherwise read storage
+      if (typeof msg.autoCopyOnMouseup === "boolean") {
+        autoCopyOnMouseup = msg.autoCopyOnMouseup;
+        ensureUI();
+      } else {
+        chrome.storage.sync.get({ autoCopyOnMouseup: true }, (cfg) => {
+          autoCopyOnMouseup = !!cfg.autoCopyOnMouseup;
+          ensureUI();
+        });
+      }
+    }
   });
 })();

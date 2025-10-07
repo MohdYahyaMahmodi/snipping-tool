@@ -1,22 +1,27 @@
 // popup.js
 function isMac() {
-  const p = navigator.platform || navigator.userAgent;
+  const p = navigator.platform || navigator.userAgent || "";
   return /Mac|Macintosh|MacIntel|MacPPC|Mac68K/.test(p);
-}
-
-function combo(global = false) {
-  if (isMac()) {
-    return global ? "⌘ ⇧ S" : "Enter or C";
-  }
-  return global ? "Ctrl ⇧ S" : "Enter or C";
 }
 
 function setShortcutTexts() {
   document.getElementById("sc-global").textContent = isMac()
     ? "⌘ ⇧ S"
     : "Ctrl ⇧ S";
-  document.getElementById("sc-copy").textContent = combo(false);
-  document.getElementById("sc-cancel").textContent = "Esc";
+}
+
+// Load & bind auto-copy preference
+function initAutoCopyCheckbox() {
+  const el = document.getElementById("autoCopy");
+  chrome.storage.sync.get(
+    { autoCopyOnMouseup: true },
+    ({ autoCopyOnMouseup }) => {
+      el.checked = !!autoCopyOnMouseup;
+    }
+  );
+  el.addEventListener("change", () => {
+    chrome.storage.sync.set({ autoCopyOnMouseup: el.checked });
+  });
 }
 
 async function ensureContent(tabId) {
@@ -27,12 +32,28 @@ async function ensureContent(tabId) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", setShortcutTexts);
+document.addEventListener("DOMContentLoaded", () => {
+  setShortcutTexts();
+  initAutoCopyCheckbox();
 
-document.getElementById("start").addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) return;
-  await ensureContent(tab.id);
-  chrome.tabs.sendMessage(tab.id, { type: "START_SNIP" });
-  window.close();
+  document.getElementById("start").addEventListener("click", async () => {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (!tab?.id) return;
+
+    // read current setting and pass through to content
+    chrome.storage.sync.get(
+      { autoCopyOnMouseup: true },
+      async ({ autoCopyOnMouseup }) => {
+        await ensureContent(tab.id);
+        chrome.tabs.sendMessage(tab.id, {
+          type: "START_SNIP",
+          autoCopyOnMouseup: !!autoCopyOnMouseup,
+        });
+        window.close();
+      }
+    );
+  });
 });
