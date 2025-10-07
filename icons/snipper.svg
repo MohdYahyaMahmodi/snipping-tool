@@ -1,15 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <rect width="256" height="256" fill="#F3F3F3"/>
-  <!-- Scissors outline -->
-  <circle cx="86" cy="166" r="18" fill="#FFFFFF" stroke="#0078D4" stroke-width="8"/>
-  <circle cx="126" cy="138" r="18" fill="#FFFFFF" stroke="#0078D4" stroke-width="8"/>
-  <path d="M94 158 L200 62" stroke="#1F1F1F" stroke-width="10" stroke-linecap="round"/>
-  <path d="M116 128 L200 194" stroke="#1F1F1F" stroke-width="10" stroke-linecap="round"/>
-  <!-- Snip rectangle -->
-  <rect x="36" y="36" width="140" height="80" fill="none" stroke="#0078D4" stroke-width="8" stroke-dasharray="16 10"/>
-  <!-- Corner handles -->
-  <rect x="28" y="28" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
-  <rect x="172" y="28" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
-  <rect x="28" y="100" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
-  <rect x="172" y="100" width="16" height="16" fill="#FFFFFF" stroke="#0078D4" stroke-width="4"/>
+  <title>Snip In Browser</title>
+  <desc>Minimal flat crop icon for the Snip In Browser Chrome extension.</desc>
+
+  <!-- Transparent background -->
+  <rect x="0" y="0" width="256" height="256" fill="none"/>
+
+  <!-- Outer crop corners (Windows accent blue) -->
+  <g stroke="#0078D4" stroke-width="14" stroke-linecap="round" fill="none">
+    <!-- Top-left -->
+    <path d="M40 92 V40 H92"/>
+    <!-- Top-right -->
+    <path d="M216 92 V40 H164"/>
+    <!-- Bottom-left -->
+    <path d="M40 164 V216 H92"/>
+    <!-- Bottom-right -->
+    <path d="M216 164 V216 H164"/>
+  </g>
+
+  <!-- Inner dashed selection rectangle -->
+  <rect x="64" y="64" width="128" height="128"
+        fill="none"
+        stroke="#1F1F1F"
+        stroke-width="6"
+        stroke-dasharray="14 10"
+        rx="4" ry="4"/>
 </svg>
